@@ -2187,7 +2187,7 @@ body.dark .task-container .checkmark:after {
 .detail-seance-dates-container{
   display: flex;
   flex-direction: row;
-  width: 100%;
+  width: 90%;
   border-bottom:1px solid rgba(146, 144, 144, 0.5);
   
 }
@@ -2470,7 +2470,6 @@ iframe {
 
 
 .salles-cinema-details{
-  
   border-bottom: 0.5px solid rgba(131, 131, 131, 0.178);
 }
 
@@ -2502,10 +2501,27 @@ iframe {
 /*================================================================SEANCES================================================================*/
 
 .seances-page{
-  min-height: 100vh;
+  
   height: 100%;
   display: flex;
+  width: 100%;
+}
+
+.detail-salles-dates-container{
+  display: flex;
+  flex-direction: row;
   width: 90%;
+  border-bottom:1px solid rgba(146, 144, 144, 0.5);
+  
+}
+
+.dark .detail-salles-dates-container{
+  display: flex;
+  flex-direction: row;
+  width: 90%;
+  margin-bottom : 30px;
+  border-bottom:1px solid rgba(255, 255, 255, 0.5);
+  
 }
 
 
