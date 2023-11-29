@@ -34,8 +34,9 @@
                             <div class="salles-info">
                                 <div class="salles-cinema">
                                     <div class="salles-cinema-name">{{ salles.cinema }} </div>
-                                    <span class="arrow"> > </span>
+                                    <span class="arrow"> <font-awesome-icon icon = "fa-solid fa-couch"/> </span>
                                 </div>
+                                <div class="salles-cinema-ville">{{ salles.ville }} </div>
 
                             </div>
 
@@ -189,6 +190,9 @@ export default defineComponent({
         await this.onMounted();
         console.log(this.transformData(this.seances))
     },
+    beforeUnmount() {
+        window.removeEventListener('resize', this.handleWindowResize);
+    }
 
 });
 </script>

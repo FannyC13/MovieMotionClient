@@ -17,7 +17,7 @@
                         :class="{ 'active-link': $route.path === '/catalog-recs-page' }">Contacts</router-link>
 
                 </div>
-
+                
                 <div class="light">
                     <DarkLightMode></DarkLightMode>
                 </div>
@@ -26,21 +26,21 @@
         <a id="top"></a>
         <div class="catalog-page">
             <div class="search-and-movie-container">
-
+                
                 <div class="search-container">
                     <div class="filter-search">
-                        <div class="filter-container">
+                    <div class="filter-container">
                             <font-awesome-icon icon="fa-solid fa-bars" @click="showFilterPage()" />
                         </div>
 
                         <div class="search-bar-container" id="first-searchy-bar">
                             <input type="text" placeholder="Search.." v-model="searchBar" name="search" id="search-bar"
                                 @keyup.enter="getFilteredMoviesWithoutAPI()">
-                            <div @click="getFilteredMoviesWithoutAPI()"><font-awesome-icon
+                            <div class = "search-icon" @click="getFilteredMoviesWithoutAPI()"><font-awesome-icon
                                     icon="fa-solid fa-magnifying-glass" /></div>
                         </div>
                     </div>
-
+                   
                     <div class="slider-radio">
                         <input type="radio" name="grade" id="featured" checked>
                         <label for="featured">Featured</label>
@@ -264,7 +264,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import DarkLightMode from "../components/DarkLightMode.vue";
-import ListePage from "../components/CatalogPage/ListePage.vue"; ListePage
+import ListePage from "../components/CatalogPage/ListePage.vue";
+
+
 import axios from "axios";
 
 export default defineComponent({
@@ -339,7 +341,7 @@ export default defineComponent({
             this.SelectedIndex = 0;
             this.SelectedAge = age;
             const modalDetails = this.$refs.modalDetails as HTMLDivElement;
-
+            console.log(this.SelectedGenre)
 
             if (modalDetails) {
                 modalDetails.style.display = "block";
@@ -512,6 +514,8 @@ export default defineComponent({
                 this.movies = filteredMovies;
             }
             console.log(this.movies)
+
+            localStorage.setItem('movies', JSON.stringify(this.movies));
         },
         async getSeances() {
             this.seances = [
@@ -545,6 +549,7 @@ export default defineComponent({
 
             await this.getFilteredMoviesWithoutAPI();
             await this.getSeances();
+
         },
     },
 

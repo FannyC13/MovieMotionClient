@@ -10,7 +10,102 @@
 body {
   min-height: 100vh;
   width: 100%;
+ 
 }
+
+/* =================================================================Footer =================================================================*/
+
+
+
+footer {
+  margin-top: 4%;
+  background: transparent;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+  z-index: 99;
+  display: flex;
+  text-align: center;
+  border-top: 0.2px solid rgba(0, 0, 0, 0.178);
+  
+}
+
+.dark footer{
+  border-top: 0.2px solid rgba(255, 255, 255, 0.178);
+}
+
+footer::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 100px;
+  height: 0px;
+  width: 100%;
+  background: #ffffff;
+}
+
+/*-------------------Footer Content---------------*/
+
+footer .content-footer {
+  max-width: 1250px;
+  margin: auto;
+  padding: 20px 0px 4px 20px;
+}
+
+footer .content-footer .top {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-bottom: 50px;
+}
+.content-footer .top .logo-details {
+  color: #fff;
+  font-size: 20px;
+  float: left;
+  margin-left: 15px;
+  display: block;
+  margin: 2px 0 0 0;
+}
+
+
+.logo-details img {
+  margin-top: 0%;
+  height: 10%;
+  width: 26%;
+  display: inline;
+  margin-right: 15px;
+  float: left;
+  opacity: 0.5;
+}
+
+@media (max-width: 1000px) {
+  .logo-details img {
+    margin-top: 5%;
+    width: 160px;
+    display: inline;
+    margin-right: 15px;
+    float: left;
+    opacity: 0.5;
+  }
+}
+
+.content-footer .top .media-icons {
+  display: flex;
+}
+
+.logo-name {
+  padding-top: 0.8em;
+  color: rgba(26, 26, 26, 0.615);
+  text-shadow: 1px 1px rgba(255, 255, 255, 0.275);
+  font-size: medium;
+  font-weight: 900;
+  font-family: serif;
+}
+
+body.dark .logo-name {
+  color: rgba(252, 252, 252, 0.615);
+}
+
 
 /* ---------------------------------------------Scrollbar-------------------------------------------*/
 
@@ -88,6 +183,9 @@ body.dark {
   background: #262a2b;
 }
 
+body.light{
+  background : aliceblue;
+}
 .container-toggle {
   transition: background 0.5s;
 }
@@ -117,6 +215,8 @@ body.dark .toggle {
   background: #545253;
   box-shadow: 0px 0px 25px rgba(204, 204, 204, 0.696);
 }
+
+
 
 .toggle:before {
   content: url(dark.svg);
@@ -949,17 +1049,21 @@ body.dark .logo-nav:before {
  
   }
   .to-page-nav:hover {
-    background: #ffffff;
     color : rgb(95, 121, 200);
-
   }
 
   .router-link-active{
     color: rgb(95, 121, 200);
+    
+  }
+
+  body.dark .router-link-active{
+    color: rgb(95, 121, 200);
   }
   
+  
   .to-page-nav:active {
-    background: rgba(106, 106, 108, 0.733);
+
     box-shadow: 0px 0px 25px rgba(69, 69, 69, 0.562);
   }
   
@@ -1015,12 +1119,12 @@ body.dark .logo-nav:before {
   display: flex;
   width: 100%;
   border-top: 0.2px solid rgba(0, 0, 0, 0.178);
-  border-bottom: 0.2px solid rgba(0, 0, 0, 0.178);
+ 
 }
 
 body.dark .catalog-page{
   border-top: 0.2px solid rgba(255, 255, 255, 0.178);
-  border-bottom: 0.2px solid rgba(255, 255, 255, 0.178);
+
 }
 
 
@@ -1029,6 +1133,7 @@ body.dark .catalog-page{
   flex-direction: column;
   width: 100%;
   height: fit-content;
+  
 
 }
 
@@ -2092,7 +2197,7 @@ body.dark .task-container .checkmark:after {
   line-height: 25px;
   
 }
-.dark .detail-langue, .dark .detail-duration, .dark .detail-date {
+.dark .detail-langue, .dark .detail-duration, .dark .detail-date ,.dark .detail-age-tous{
   margin : 0;
   color: #c5c6c9;
   text-shadow: 2px 2px rgba(145, 172, 242, 0.482);
@@ -2404,7 +2509,10 @@ iframe {
   height: 100%;
   display: flex;
   width: 100%;
+  margin-bottom : 50vh;
+  
 }
+
 
 .detail-salles{
   margin-top : 15px;
@@ -2481,7 +2589,7 @@ iframe {
 }
 
 .salles-info{
-  padding : 20px 20px 20px 2px ;
+  padding : 30px 30px 30px 2px ;
 }
 
 .salles-cinema-details:hover {
@@ -2500,11 +2608,26 @@ iframe {
 
 /*================================================================SEANCES================================================================*/
 
+
+body.center-container {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+}
+
+
 .seances-page{
   
   height: 100%;
   display: flex;
-  width: 100%;
+  width: 75%;
+  justify-content: center;
+  align-items: center;
+  margin-bottom : 50vh;
+  
 }
 
 .detail-salles-dates-container{
@@ -2604,22 +2727,31 @@ iframe {
 .seances-infos{
   
   padding : 20px 20px 20px 2px ;
- 
+  margin-left : 80px;
 }
 
 .seances-salles-cinema{ 
   display: flex;
-  align-items: center;
-  flex-direction: row;
+  flex-direction: column;
   gap : 10px;
-  margin-bottom : 20px;
+  
 }
 
 .seances-cinema-details{
-
+  margin-top : 50px;
   border-bottom: 0.5px solid rgba(131, 131, 131, 0.178);
 }
 
+.seances-cinema-name-age{
+  display: flex;
+  flex-direction: row;
+  gap : 10px;
+}
+
+.seances-cinema-name-age-tous{
+  margin-bottom : 10px;
+  
+}
 
 
 .seance:hover {
@@ -2632,6 +2764,133 @@ iframe {
   cursor: pointer;
 }
 
-.seance:hover .arrow {
-  margin-left: 10px; 
+.seances-films-infos{
+  display : flex;
+  flex-direction: row;
+  gap :60px;
+}
+
+.seances-movie-cover{
+  height : 190px;
+  width : 140px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  box-shadow: 6px -4px 19px -1px rgba(204, 208, 220, 0.516);
+}
+
+.dark .seances-movie-cover{
+  box-shadow: 6px -4px 19px -1px rgba(204, 208, 220, 0.516);
+}
+
+
+
+
+.seance-detail-age {
+  margin : 0;
+  margin-top : 4px;
+  color: #474748;
+  text-shadow: 1px 1px rgba(145, 172, 242, 0.482);
+  font-size: 14px;
+  width: 24px;
+  height: 24px;
+  background-color: rgba(145, 172, 242, 0.482);
+  color: white; 
+  text-align: center;
+  border-radius: 50%; 
+  font-size: 9px;
+  line-height: 25px;
+  
+}
+
+.seance-detail-age-tous {
+  margin : 0;
+  margin-top : 5px;
+  color: #474748;
+  text-shadow: 1px 1px rgba(145, 172, 242, 0.482);
+  font-size: 14px;
+}
+
+.dark .seance-detail-age-tous{
+  color: rgba(148, 171, 227, 0.855);
+  text-shadow: 1px 1px rgba(145, 172, 242, 0.482);
+}
+
+
+.seance-detail-synopsis {
+  color: #474748;
+  text-shadow: 1px 1px rgba(145, 172, 242, 0.482);
+  font-size: 18px;
+  justify-content: right;
+  margin : 0;
+  width : 80%;
+}
+
+.dark .seance-detail-synopsis {
+  color: rgba(101, 124, 182, 0.855);
+  text-shadow: 0.5px 0.5px rgba(145, 172, 242, 0.482);
+  justify-content: justify;
+  font-size: 16px;
+  margin : 0;
+}
+
+
+
+.dark .seances-salles-cinema-name{
+  color: rgba(148, 171, 227, 0.855);
+  text-shadow: 1.5px 1px rgba(145, 172, 242, 0.482);
+  font-size: 26px;
+  width : fit-content;
+}
+
+
+.salles-seance{
+  color: rgba(79, 93, 129, 0.855);
+  text-shadow: 0.5px 0.5px rgba(145, 172, 242, 0.482);
+  padding : 8px;
+  font-size : 13px;
+  border-radius: 10px;
+  border: 0.5px solid #6e6e708a;
+  text-align:center ;
+}
+
+.dark .salles-seance{
+  color:  rgba(148, 171, 227, 0.855);
+  text-shadow: 1px 1px rgba(145, 172, 242, 0.482);
+  padding : 10px;
+  font-size : 13px;
+  border-radius: 8px;
+  border: 0.5px solid #6e6e708a;
+}
+
+.salles-seance:hover {
+  background-color: #e0e0e0;
+  cursor: pointer;
+}
+
+.dark .salles-seance:hover {
+  background-color: rgba(242, 242, 242, 0.121);
+  cursor: pointer;
+}
+
+
+.seance-detail-genre {
+  color:  #9595b3;
+  text-shadow: 1px 1px rgba(145, 172, 242, 0.482);
+  font-size: 12px;
+  margin : 0;
+  
+}
+.dark .seance-detail-genre {
+  color: #afafcb;
+  text-shadow: 0.3px 0.3px rgba(89, 102, 136, 0.482);
+  font-size: 12px;
+  margin-top : 6px;
+  
+}
+
+.seance-details-date-duration-langue{
+  display : flex;
+  flex-direction: row;
+  gap : 8px;
+ 
 }

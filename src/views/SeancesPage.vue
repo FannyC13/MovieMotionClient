@@ -1,5 +1,5 @@
 <template>
-  <body>
+  <body class="center-container">
     <header>
       <div class="headernav">
         <div class="header-container">
@@ -43,12 +43,38 @@
                 @click="openSeancesPage(salles.cinema)">
 
                 <div class="seances-infos">
-                  <div class="seances-salles-cinema">
-                    <div class="salles-cinema-name">{{ salles.titre }} </div>
+                  <div class="seances-films-container">
+                    <div class="seances-films-infos" v-if="hasMovieWithTitle(salles.titre)">
+                      <img :src="'/src/assets/Affiches/' + displayMovieDetails(salles.titre).image_src" alt="movie_pic" class="seances-movie-cover">
+                      <div class="seances-salles-cinema">
+                        <div class="seances-cinema-name-age-tous">
+                          <div class="seances-cinema-name-age">
+                            <div class="seances-salles-cinema-name">{{ salles.titre }} </div>
+
+                            <p v-if="displayMovieDetails(salles.titre).age !== 'Tous Public'" class="seance-detail-age">
+                              -{{ displayMovieDetails(salles.titre)["age"] }}</p>
+                          </div>
+                          <p v-if="displayMovieDetails(salles.titre).age == 'Tous Public'" class="seance-detail-age-tous">
+                            {{ displayMovieDetails(salles.titre)["age"] }}</p>
+                          
+                            <p class = "seance-detail-genre" >{{ Genres.join('. ') }}</p>
+                            <div class="seance-details-date-duration-langue">
+                              <p class="seance-detail-genre">{{ displayMovieDetails(salles.titre)["langue"] }}</p>
+                              <p class="seance-detail-genre">{{ displayMovieDetails(salles.titre)["duration"]}}</p>
+                              <p class="seance-detail-genre">{{ displayMovieDetails(salles.titre)["date_sortie"].substring(0,4) }}</p>
+                            </div>
+                          </div>
+
+                          <div class = "seance-detail-synopsis" v-if="hasMovieWithTitle(salles.titre)">{{ displayMovieDetails(salles.titre)["synopsis"] }}
+                          
+                          
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <div class="seances">
 
-                    <div v-for="(seance, seanceIndex) in salles.seances" :key="seanceIndex" class="seance">
+                    <div v-for="(seance, seanceIndex) in salles.seances" :key="seanceIndex" class="salles-seance">
                       <div class="seance-heure">{{ seance.heure }}</div>
                       <div class="seance-version">{{ seance.version }}</div>
                     </div>
@@ -82,7 +108,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import DarkLightMode from "../components/DarkLightMode.vue";
-import ListePage from "../components/CatalogPage/ListePage.vue"; ListePage
+import ListePage from "../components/CatalogPage/ListePage.vue";
 import axios from "axios";
 
 export default defineComponent({
@@ -107,6 +133,8 @@ export default defineComponent({
       dates: [{ jour: 'Dim', jourChiffre: 26, mois: 'nov', cinemas: [{ name: 'UGC Gobelins', ville: 'Paris 13', seances: [{ heure: '15:00' }, { heure: '18:00' }] }, { name: 'Pathé Opéra', ville: 'Paris 02', seances: [{ heure: '17:30' }, { heure: '20:00' }] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '15:45' }, { heure: '19:00' }] }] }, { jour: 'Lun', jourChiffre: 27, mois: 'nov', cinemas: [{ name: 'Mk2 Odéon', ville: 'Paris 06', seances: [{ heure: '16:00' }, { heure: '19:30' }] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '15:45' }, { heure: '19:00' }] }] }, { jour: 'Mar', jourChiffre: 28, mois: 'nov', cinemas: [{ name: 'UGC Halles', ville: 'Paris 01', seances: [{ heure: '14:30' }, { heure: '17:45' }] }, { name: 'Mk2 Odéon', ville: 'Paris 06', seances: [{ heure: '16:15' }, { heure: '18:30' }] }] }],
       SelectedIndex: 0,
       cinema: '',
+      movies: [],
+      Genre : [] as string[],
 
     };
   },
@@ -115,6 +143,10 @@ export default defineComponent({
     this.cinema = Array.isArray(this.$route.params.cinema) ? this.$route.params.cinema[0] : this.$route.params.cinema || "";
     this.transformedData = this.transformData(this.seancesList);
     this.seance = this.transformedData.find(entry => entry.cinema === this.cinema)
+
+    const storedMovies = localStorage.getItem('movies');
+    const parsedMovies = JSON.parse(storedMovies);
+    this.movies = parsedMovies
     console.log(this.seance)
   },
   computed: {
@@ -131,7 +163,18 @@ export default defineComponent({
     },
   },
   methods: {
+    hasMovieWithTitle(titre) {
+      return this.movies.some(movie => movie.titre === titre);
+    },
+    displayMovieDetails(titre) {
 
+      const movie = this.movies.find(movie => movie.titre === titre);
+
+      this.Genres = movie["genres"].map(function(item) {return item.genre;});
+      
+      return movie
+
+    },
     selectDate(index) {
       console.log(index)
       this.SelectedIndex = index;
@@ -200,16 +243,15 @@ export default defineComponent({
       window.addEventListener("scroll", myScrollFunc);
       window.addEventListener('resize', this.handleWindowResize);
 
-
-
-      console.log(this.dates)
     },
   },
 
   async mounted() {
     await this.onMounted();
-
   },
+  beforeUnmount() {
+        window.removeEventListener('resize', this.handleWindowResize);
+    }
 
 });
 </script>
