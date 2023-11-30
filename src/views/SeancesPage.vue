@@ -9,7 +9,7 @@
         </div>
         <div class="Navbar">
           <router-link to="/catalog-page" class="to-page-nav"
-            :class="{ 'active-link': $route.path === '/catalog-page' }">Movie catalog</router-link>
+            :class="{ 'active-link': $route.path === '/catalog-page' }">Movies</router-link>
           <router-link to="/cinema" class="to-page-nav"
             :class="{ 'active-link': $route.path === '/cinema' }">Cinema</router-link>
           <router-link to="/catalog-recs-page" class="to-page-nav"
