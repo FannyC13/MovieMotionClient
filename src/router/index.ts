@@ -15,7 +15,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: LandingPage
+      component: CatalogPage
     },
     {
       path: '/Admin',

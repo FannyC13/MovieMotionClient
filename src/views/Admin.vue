@@ -544,7 +544,7 @@
                                                     @click.prevent=CloseUpdateAddModal() />
                                             </div>
                                             <div class="AddTaskInputBox no">
-                                                <input style="margin-left: 0px;" type="submit" value="Add" name="submit" />
+                                                <input style="margin-left: 0px;" type="submit" value="Update" name="submit" />
                                             </div>
                                         </div>
                                     </div>
@@ -674,7 +674,7 @@
                         <div class="details-block-container">
                             <span class="close" @click=CloseUpdateSeanceModal()>&times;</span>
                             <div class="loginForm">
-                                <div class="modal-Title-admin">Add a Seance</div>
+                                <div class="modal-Title-admin">Update a Seance</div>
                                 <p class="Form-presentation" style="text-align: center">
                                     <br />
                                     Please fill in
@@ -748,7 +748,7 @@
                                                     @click.prevent=CloseUpdateSeanceModal() />
                                             </div>
                                             <div class="AddTaskInputBox no">
-                                                <input style="margin-left: 0px;" type="submit" value="Add" name="submit" />
+                                                <input style="margin-left: 0px;" type="submit" value="Update" name="submit" />
                                             </div>
                                         </div>
                                     </div>
@@ -916,7 +916,7 @@
                                                     @click="CloseUpdateCinemaModal()" />
                                             </div>
                                             <div class="AddTaskInputBox no">
-                                                <input style="margin-left: 0px;" type="submit" value="Add" name="submit" />
+                                                <input style="margin-left: 0px;" type="submit" value="Update" name="submit" />
                                             </div>
                                         </div>
                                     </div>
