@@ -3,7 +3,7 @@
         <header>
             <router-link to="/catalog-page">
                 <div class="header-image-trailer">
-                <font-awesome-icon icon="fa-solid fa-arrow-left" class="arrow-return-trailer" />
+                <font-awesome-icon icon="fa-solid fa-house" class="arrow-return-trailer" />
                 </div>
              </router-link>
              <div v-show = false class="light">

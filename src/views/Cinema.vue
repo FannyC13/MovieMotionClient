@@ -13,8 +13,8 @@
                         :class="{ 'active-link': $route.path === '/catalog-page' }">Movies</router-link>
                     <router-link to="/cinema" class="to-page-nav"
                         :class="{ 'active-link': $route.path === '/cinema' }">Cinema</router-link>
-                    <router-link to="/catalog-recs-page" class="to-page-nav"
-                        :class="{ 'active-link': $route.path === '/catalog-recs-page' }">Contacts</router-link>
+                    <router-link to="/contact" class="to-page-nav"
+                        :class="{ 'active-link': $route.path === '/contact' }">About Us</router-link>
                 </div>
 
                 <div class="light">
@@ -68,6 +68,7 @@ import { defineComponent } from 'vue';
 import DarkLightMode from "../components/DarkLightMode.vue";
 import ListePage from "../components/CatalogPage/ListePage.vue"; ListePage
 import axios from "axios";
+import { checkAdminToken, setAuthentication, isAuthenticatedUser } from '../router/auth';
 
 export default defineComponent({
     name: "CinemaPage",
@@ -180,15 +181,35 @@ export default defineComponent({
             window.addEventListener("scroll", myScrollFunc);
             window.addEventListener('resize', this.handleWindowResize);
 
-
-
             console.log(this.dates)
         },
+        redirection() {
+            const token = this.$route.params.token;
+           
+            if (token) {
+                console.log("This is the token", token)
+                checkAdminToken(token).then((isAdmin) => {
+                    setAuthentication(isAdmin);
+                    console.log(isAdmin)
+                    if (isAdmin) {
+                        this.$router.push({ name: 'Admin' });
+                       
+                    } else {
+                        
+                        this.$router.push("/cinema");
+                    }
+                });
+            } else {
+                this.$router.push("/cinema");
+            }
+        },
     },
-
+   
     async mounted() {
+        this.redirection();
         await this.onMounted();
         console.log(this.transformData(this.seances))
+        localStorage.setItem('cinemas', JSON.stringify(this.transformData(this.seances)));
     },
     beforeUnmount() {
         window.removeEventListener('resize', this.handleWindowResize);

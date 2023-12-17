@@ -20,11 +20,24 @@ import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons'
 import { faHeartCirclePlus } from '@fortawesome/free-solid-svg-icons'
 import { faBookmark as faBookmarkSolid } from '@fortawesome/free-solid-svg-icons'
 import { faBars } from '@fortawesome/free-solid-svg-icons'
-
-
+import { checkAdminToken, setAuthentication } from './router/auth';
 import VScrollLock from 'v-scroll-lock'
 
 library.add(fas);
 library.add(faUserLarge, faArrowUp, faMagnifyingGlass, faAngleLeft, faAngleRight, faPlus, faHeartSolid, faHeartCirclePlus, faBookmarkSolid, faBars)
 
-createApp(App).use(router).use(VScrollLock).component('font-awesome-icon', FontAwesomeIcon).mount('#app')
+createApp(App).use(router).use(VScrollLock)
+const app = createApp(App);
+app.use(router);
+app.use(VScrollLock);
+
+
+const token = ""
+
+checkAdminToken(token).then((isAdmin) => {
+  
+  setAuthentication(isAdmin);
+  
+  app.component('font-awesome-icon', FontAwesomeIcon);
+  app.mount('#app');
+});

@@ -13,11 +13,11 @@
                         :class="{ 'active-link': $route.path === '/catalog-page' }">Movies</router-link>
                     <router-link to="/cinema" class="to-page-nav"
                         :class="{ 'active-link': $route.path === '/cinema' }">Cinema</router-link>
-                    <router-link to="/catalog-recs-page" class="to-page-nav"
-                        :class="{ 'active-link': $route.path === '/catalog-recs-page' }">Contacts</router-link>
+                    <router-link to="/contact" class="to-page-nav"
+                        :class="{ 'active-link': $route.path === '/contact' }">About Us</router-link>
 
                 </div>
-                
+
                 <div class="light">
                     <DarkLightMode></DarkLightMode>
                 </div>
@@ -26,21 +26,21 @@
         <a id="top"></a>
         <div class="catalog-page">
             <div class="search-and-movie-container">
-                
+
                 <div class="search-container">
                     <div class="filter-search">
-                    <div class="filter-container">
+                        <div class="filter-container">
                             <font-awesome-icon icon="fa-solid fa-bars" @click="showFilterPage()" />
                         </div>
 
                         <div class="search-bar-container" id="first-searchy-bar">
                             <input type="text" placeholder="Search.." v-model="searchBar" name="search" id="search-bar"
                                 @keyup.enter="getFilteredMoviesWithoutAPI()">
-                            <div class = "search-icon" @click="getFilteredMoviesWithoutAPI()"><font-awesome-icon
+                            <div class="search-icon" @click="getFilteredMoviesWithoutAPI()"><font-awesome-icon
                                     icon="fa-solid fa-magnifying-glass" /></div>
                         </div>
                     </div>
-                   
+
                     <div class="slider-radio">
                         <input type="radio" name="grade" id="featured" checked>
                         <label for="featured">Featured</label>
@@ -61,11 +61,11 @@
                     <div class="movie-catalog-container">
 
                         <div v-for="(movie) in movies"
-                            @click="OpenDetails(movie.titre, movie.genres, movie.synopsis, movie.duration, movie.date_sortie, movie.trailer, movie.langue, movie.age)">
+                            @click="OpenDetails(movie.titre, movie.genres, movie.realisateur, movie.acteurs, movie.synopsis, movie.duration, movie.date_sortie, movie.trailer, movie.langue, movie.age)">
 
                             <div class="movie">
                                 <div>
-                                    <img :src="'src/assets/Affiches/' + movie.image_src" alt="movie_pic"
+                                    <img :src="getImageUrl(movie.image_src, 'Affiches/')" alt="movie_pic"
                                         class="movie-cover">
                                 </div>
                                 <div class="movie-title"> {{ movie.titre }} </div>
@@ -166,13 +166,14 @@
                                     <span class="close" @click="CloseDetails">&times;</span>
 
                                     <div class="details-image-container">
-                                        <img :src="'src/assets/Details/' + SelectedMovie + '.jpg'"
+                                        <img :src="getImageUrl(SelectedMovie + '.jpg', 'Details/')"
                                             class="cover details-cover" />
                                     </div>
 
                                     <div class="details-title-container">
                                         <p class="detail-genre">{{ SelectedGenre.join('. ') }}</p>
                                         <p class="details-main-Title">{{ SelectedMovie }}</p>
+                                        
                                     </div>
                                 </div>
                                 <div class="details-container">
@@ -192,10 +193,20 @@
                                                 <p class="detail-langue">{{ SelectedLangue }}</p>
                                                 <p class="detail-duration">{{ SelectedDuration }}</p>
                                                 <p class="detail-date">{{ SelectedDate }}</p>
+                                                <p class="detail-realisateur"> {{ SelectedRealisateur}}</p>
 
                                             </div>
+                                    
                                             <div class="details-container-synopsis">
                                                 <p class="detail-synopsis">{{ SelectedSynopsis }}</p>
+                                            </div>
+                                            <div class="details-container-acteurs">
+                                                <div v-for = "acteurs in SelectedActors" >
+                                                    <div class="details-acteurs">
+                                                        <img :src="getImageUrl(acteurs.replace(/\s/g, '') + '.jpeg', 'Acteurs/')" class="cover details-cover-acteurs" />
+                                                        <p class = "detail-acteur">{{ acteurs }}</p>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -265,7 +276,7 @@
 import { defineComponent } from 'vue';
 import DarkLightMode from "../components/DarkLightMode.vue";
 import ListePage from "../components/CatalogPage/ListePage.vue";
-
+import { checkAdminToken, setAuthentication } from '../router/auth'
 
 import axios from "axios";
 
@@ -282,7 +293,7 @@ export default defineComponent({
             selectedPage: 0,
             nbTotalMovies: 100,
             searchBar: "",
-            movies: [] as Array<{ titre: string; date_sortie: string; image_src: string; langue: string; duration: string; genres: { genre: string }[]; synopsis: string; trailer: string; age: string; }>,
+            movies: [] as Array<{ titre: string; realisateur : string, acteurs : {nom_acteur : string}[],  date_sortie: string; image_src: string; langue: string; duration: string; genres: { genre: string }[]; synopsis: string; trailer: string; age: string; }>,
             liked: false,
             read: false,
             genres: [],
@@ -294,6 +305,8 @@ export default defineComponent({
             SelectedLink: "",
             SelectedLangue: "",
             SelectedAge: "",
+            SelectedRealisateur : "",
+            SelectedActors : [] as string[],
             langues_list: ["Anglais", "Français"],
             genre_list: ["Action", "Horreur", "Drama", "Romance"],
             sortie_list: ["Aujourd'hui", "Cette semaine", "Ce mois"],
@@ -322,14 +335,13 @@ export default defineComponent({
     methods: {
 
         selectDate(index) {
-
             this.SelectedIndex = index;
         },
         getSelectedMovieSeances() {
 
             return this.seances.find(movie => movie.titre === this.SelectedMovie) || [];
         },
-        OpenDetails(movie: string, genre: { genre: string }[], synopsis: string, duration: string, date_sortie: string, link: string, langue: string, age: string) {
+        OpenDetails(movie: string, genre: { genre: string }[], realisateur: string, acteurs : {nom_acteur : string}[], synopsis: string, duration: string, date_sortie: string, link: string, langue: string, age: string) {
 
             this.SelectedMovie = movie;
             this.SelectedGenre = Array.isArray(genre) ? genre.map(g => g.genre) : [genre];
@@ -340,6 +352,9 @@ export default defineComponent({
             this.SelectedLangue = langue;
             this.SelectedIndex = 0;
             this.SelectedAge = age;
+            this.SelectedRealisateur = realisateur;
+            this.SelectedActors = Array.isArray(acteurs) ? acteurs.map(g => g.nom_acteur) : [acteurs];
+
             const modalDetails = this.$refs.modalDetails as HTMLDivElement;
             console.log(this.SelectedGenre)
 
@@ -399,7 +414,6 @@ export default defineComponent({
 
         },
         openTrailerPage() {
-
             this.$router.push({ name: 'TrailerPage', params: { link: this.SelectedLink } });
         },
         async getFilteredMoviesWithoutAPI() {
@@ -414,12 +428,15 @@ export default defineComponent({
                 langue: string;
                 duration: string;
                 genres: { genre: string }[];
+                acteurs : {nom_acteur : string}[];
                 synopsis: string;
                 trailer: string;
+                realisateur: string;
             }> = [];
 
             titles.map(function (title, index) {
                 type Genre = { genre: string };
+                type Acteur = { nom_acteur: string };
                 var movieData: {
                     titre: string;
                     age: string;
@@ -430,6 +447,8 @@ export default defineComponent({
                     genres: Genre[];
                     synopsis: string;
                     trailer: string;
+                    acteurs : Acteur[],
+                    realisateur: string
                 } = {
                     titre: title,
                     age: '',
@@ -440,6 +459,8 @@ export default defineComponent({
                     genres: [],
                     synopsis: '',
                     trailer: trailer_links[index],
+                    acteurs : [],
+                    realisateur : '',
                 };
 
                 switch (title) {
@@ -450,7 +471,8 @@ export default defineComponent({
                         movieData.langue = "Anglais";
                         movieData.duration = "2h46";
                         movieData.synopsis = "In the distant future, Paul Atreides becomes embroiled in political intrigue and must navigate the dangerous desert planet Arrakis to secure the future of his people.";
-
+                        movieData.realisateur = "Denis Villeneuve";
+                        movieData.acteurs = [{nom_acteur : "Timothée Chalamet"}, {nom_acteur : "Zendaya"}, {nom_acteur : "Rebecca Ferguson"}] as Acteur[];
                         break;
                     case "Interstellar":
                         movieData.age = "Tous Public";
@@ -459,6 +481,8 @@ export default defineComponent({
                         movieData.langue = "Anglais";
                         movieData.duration = "2h20";
                         movieData.synopsis = "A team of astronauts embarks on a perilous journey through a wormhole in search of a new habitable planet for humanity as Earth faces an environmental catastrophe.";
+                        movieData.realisateur = "Christopher Nolan";
+                        movieData.acteurs = [{nom_acteur : "Matthew McConaughey"}, {nom_acteur : "Anne Hathaway"}, {nom_acteur : "Michael Caine"}] as Acteur[];
                         break;
                     case "Joker":
                         movieData.age = "16";
@@ -467,6 +491,8 @@ export default defineComponent({
                         movieData.langue = "Anglais";
                         movieData.duration = "1h35";
                         movieData.synopsis = "In Gotham City, failed comedian Arthur Fleck descends into madness, transforming into the iconic and anarchic criminal known as the Joker.";
+                        movieData.realisateur = "Todd Phillips";
+                        movieData.acteurs = [{nom_acteur : "Joaquin Phoenix"}, {nom_acteur : "Robert De Niro"}, {nom_acteur : "Zazie Beetz"}] as Acteur[];
                         break;
                     case "Scary Movie":
                         movieData.age = "16";
@@ -475,6 +501,9 @@ export default defineComponent({
                         movieData.langue = "Anglais";
                         movieData.duration = "2h05";
                         movieData.synopsis = "A comedic parody that satirizes popular horror and thriller movies, bringing humor to classic scary movie tropes.";
+                        movieData.realisateur = "Keenen Ivory Wayans";
+                        movieData.acteurs = [{nom_acteur : "Anna Faris"}, {nom_acteur : "Shawn Wayans"}, {nom_acteur : "Shannon Elizabeth"}] as Acteur[];
+                        
                         break;
                     case "The Maze Runner":
                         movieData.age = "12";
@@ -483,14 +512,18 @@ export default defineComponent({
                         movieData.langue = "Anglais";
                         movieData.duration = "2h00";
                         movieData.synopsis = "A group of young individuals finds themselves trapped in a mysterious maze, with no memory of how they got there, and must navigate its challenges to escape.";
+                        movieData.realisateur = "Wes Bal";
+                        movieData.acteurs = [{nom_acteur : "Dylan O'Brien"}, {nom_acteur : "Thomas Brodie-Sangster"}, {nom_acteur : "Kaya Scodelario"}] as Acteur[];
                         break;
                     case "Top Gun":
                         movieData.age = "12";
-                        movieData.date_sortie = '1986-05-16';
+                        movieData.date_sortie = '2022-05-25';
                         movieData.genres = [{ genre: 'Action' }, { genre: 'Drama' }] as Genre[];
                         movieData.langue = "Anglais Français";
                         movieData.duration = "2h55";
                         movieData.synopsis = "Maverick, a talented fighter pilot, competes at the Top Gun Naval Fighter Weapons School, facing intense competition and forming bonds that will shape his future.";
+                        movieData.realisateur = "Joseph Kosinski";
+                        movieData.acteurs = [{nom_acteur : "Tom Cruise"}, {nom_acteur : "Miles Teller"}, {nom_acteur : "Jennifer Connelly"}] as Acteur[];
                         break;
                     case "Uncharted":
                         movieData.age = "14";
@@ -499,6 +532,8 @@ export default defineComponent({
                         movieData.langue = "Anglais";
                         movieData.duration = "2h48";
                         movieData.synopsis = "Nathan Drake, a treasure hunter, embarks on a perilous journey to uncover historical mysteries and face ruthless enemies in this action-adventure film.";
+                        movieData.realisateur = "Christopher Nolan";
+                        movieData.acteurs = [{nom_acteur : "Tom Holland"}, {nom_acteur : "Mark Wahlberg"}, {nom_acteur : "Sophia Taylor Al"}] as Acteur[];
                         break;
                     default:
                         break;
@@ -520,21 +555,55 @@ export default defineComponent({
         async getSeances() {
             this.seances = [
                 { titre: 'Dune', dates: [{ jour: 'Dim', jourChiffre: 26, mois: 'nov', cinemas: [{ name: 'UGC Gobelins', ville: 'Paris 13', seances: [{ heure: '15:00', version: 'VO' }, { heure: '18:00', version: 'VF' }] }, { name: 'Pathé Opéra', ville: 'Paris 02', seances: [{ heure: '17:30', version: 'VO' }, { heure: '20:00', version: 'VO' }] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '15:45', version: 'VOSTFR' }, { heure: '19:00', version: 'VOSTFR' }] }] }, { jour: 'Lun', jourChiffre: 27, mois: 'nov', cinemas: [{ name: 'Mk2 Odéon', ville: 'Paris 06', seances: [{ heure: '16:00', version: 'VO' }, { heure: '19:30', version: 'VO' }] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '15:45', version: 'VO' }, { heure: '19:00', version: 'VF' }] }] }, { jour: 'Mar', jourChiffre: 28, mois: 'nov', cinemas: [{ name: 'UGC Halles', ville: 'Paris 01', seances: [{ heure: '14:30', version: 'VO' }, { heure: '17:45', version: 'VO' }] }, { name: 'Mk2 Odéon', ville: 'Paris 06', seances: [{ heure: '16:15', version: 'VO' }, { heure: '18:30', version: 'VO' }] }] }] },
-                { titre: 'Interstellar', dates: [{ jour: 'Dim', jourChiffre: 26, mois: 'nov', cinemas: [{ name: 'UGC Gobelins', ville: 'Paris 13', seances: [{ heure: '15:00' }, { heure: '18:00' }] }, { name: 'UGC Danton', ville: 'Paris 06', seances: [{ heure: '14:30' }, { heure: '16:00' }, { heure: '20:00' }] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '15:45' }, { heure: '19:00' }] }] }, { jour: 'Lun', jourChiffre: 27, mois: 'nov', cinemas: [{ name: 'Mk2 Gobelins', ville: 'Paris 13', seances: [{ heure: '16:00' }, { heure: '21:30' }] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '15:45' }, { heure: '19:00' }] }] }, { jour: 'Mar', jourChiffre: 28, mois: 'nov', cinemas: [{ name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '17:45' }, { heure: '20:00' }] }, { name: 'Mk2 Odéon', ville: 'Paris 06', seances: [{ heure: '16:15' }, { heure: '18:30' }] }] }] },
-                { titre: 'Joker', dates: [{ jour: 'Dim', jourChiffre: 26, mois: 'nov', cinemas: [{ name: 'UGC Gobelins', ville: 'Paris 13', seances: [{ heure: '16:00' }, { heure: '19:00' }] }, { name: 'UGC Danton', ville: 'Paris 06', seances: [{ heure: '14:30' }, { heure: '15:00' }, { heure: '20:00' }] }, { name: 'Le Grand Rex', ville: 'Paris 02', seances: [{ heure: '15:00' }, { heure: '19:00' }] }] }, { jour: 'Lun', jourChiffre: 27, mois: 'nov', cinemas: [{ name: 'UGC Bercy', ville: 'Paris 14', seances: [{ heure: '13:00' }, { heure: '20:30' }] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '15:45' }, { heure: '19:00' }] }] }] },
-                { titre: 'Scary Movie', dates: [{ jour: 'Dim', jourChiffre: 26, mois: 'nov', cinemas: [{ name: 'UGC Montparnasse', ville: 'Paris 06', seances: [{ heure: '18:00' }, { heure: '20:00' }] }, { name: 'Le Luxor', ville: 'Paris 10', seances: [{ heure: '15:30' }, { heure: '18:00' }, { heure: '21:00' }] }, { name: 'Mk2 Nation', ville: 'Paris 12', seances: [{ heure: '16:30' }, { heure: '20:00' }] }] }, { jour: 'Lun', jourChiffre: 27, mois: 'nov', cinemas: [{ name: 'Mk2 Gobelins', ville: 'Paris 13', seances: [{ heure: '16:00' }, { heure: '21:30' }] }, { name: 'Mk2 Bibliothèque', ville: 'Paris 13', seances: [{ heure: '17:45' }, { heure: '19:00' }] }] }, { jour: 'Mar', jourChiffre: 28, mois: 'nov', cinemas: [{ name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '17:45' }, { heure: '20:00' }] }, { name: 'Mk2 Odéon', ville: 'Paris 06', seances: [{ heure: '16:15' }, { heure: '18:30' }] }] }] },
-                { titre: 'The Maze Runner', dates: [{ jour: 'Dim', jourChiffre: 26, mois: 'nov', cinemas: [{ name: 'UGC Gobelins', ville: 'Paris 13', seances: [{ heure: '17:00' }, { heure: '19:00' }] }, { name: 'MK2 Gambetta', ville: 'Paris 20', seances: [{ heure: '14:30' }, { heure: '16:00' }, { heure: '20:00' }] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '16:45' }, { heure: '19:00' }] }] }, { jour: 'Lun', jourChiffre: 27, mois: 'nov', cinemas: [{ name: 'UGC Issy-Les-Moulineaux', ville: 'Issy-Les-Moulineaux', seances: [{ heure: '16:00' }, { heure: '21:30' }] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '15:45' }, { heure: '19:00' }] }] }, { jour: 'Mar', jourChiffre: 28, mois: 'nov', cinemas: [{ name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '17:45' }, { heure: '20:00' }] }, { name: 'Pathé Boulogne', ville: 'Boulogne', seances: [{ heure: '15:15' }, { heure: '18:30' }] }] }, { jour: 'Mer', jourChiffre: 29, mois: 'nov', cinemas: [{ name: 'UGC Creteil', ville: 'Créteil', seances: [{ heure: '17:45', version: 'VF' }, { heure: '20:00', version: 'VO' }] }, { name: 'UGC Velizy', ville: 'Velizy', seances: [{ heure: '15:15' }, { heure: '17:30' }] }] }] },
-                { titre: 'Top Gun', dates: [{ jour: 'Dim', jourChiffre: 26, mois: 'nov', cinemas: [{ name: 'Pathé Ivry', ville: 'Ivry-Sur-Seine', seances: [{ heure: '16:30' }, { heure: '18:00' }] }, { name: 'UGC Danton', ville: 'Paris 06', seances: [{ heure: '14:30' }, { heure: '16:00' }, { heure: '20:00' }] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '15:45' }, { heure: '19:00' }] }] }, { jour: 'Lun', jourChiffre: 27, mois: 'nov', cinemas: [{ name: 'Mk2 Gobelins', ville: 'Paris 13', seances: [{ heure: '16:00' }, { heure: '21:30' }] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '18:30' }, { heure: '20:00' }] }] }, { jour: 'Mar', jourChiffre: 28, mois: 'nov', cinemas: [{ name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '17:45' }, { heure: '20:00' }] }, { name: 'Helios', ville: 'Colombes', seances: [{ heure: '16:15' }, { heure: '18:30' }] }] }] },
-                { titre: 'Uncharted', dates: [{ jour: 'Dim', jourChiffre: 26, mois: 'nov', cinemas: [{ name: 'Royal Palace', ville: 'Nogent-Sur-Marne', seances: [{ heure: '16:00' }, { heure: '18:00' }] }, { name: 'Pathé Thiais', ville: 'Thiais', seances: [{ heure: '15:30' }, { heure: '19:45' }, { heure: '22:00' }] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '15:45' }, { heure: '19:00' }] }] }, { jour: 'Lun', jourChiffre: 27, mois: 'nov', cinemas: [{ name: 'Mk2 Gobelins', ville: 'Paris 13', seances: [{ heure: '16:00' }, { heure: '21:30' }] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '15:45' }, { heure: '19:00' }] }] }, { jour: 'Mar', jourChiffre: 28, mois: 'nov', cinemas: [{ name: 'UGC Creteil', ville: 'Créteil', seances: [{ heure: '17:45' }, { heure: '20:00' }] }, { name: 'UGC Velizy', ville: 'Velizy', seances: [{ heure: '16:15' }, { heure: '18:30' }] }] }] }
+                { titre: 'Interstellar', dates: [{ jour: 'Dim', jourChiffre: 26, mois: 'nov', cinemas: [{ name: 'UGC Gobelins', ville: 'Paris 13', seances: [{ heure: '15:00' }, { heure: '18:00' }] }, { name: 'UGC Danton', ville: 'Paris 06', seances: [{ heure: '14:30' , version: 'VO' }, { heure: '16:00' , version: 'VF' }, { heure: '20:00' , version: 'VOSTFR' }] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '15:45' , version: 'VO' }, { heure: '19:00' , version: 'VO'}] }] }, { jour: 'Lun', jourChiffre: 27, mois: 'nov', cinemas: [{ name: 'Mk2 Gobelins', ville: 'Paris 13', seances: [{ heure: '16:00', version: 'VO' }, { heure: '21:30' , version: 'VO'}] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '15:45' , version: 'VO' }, { heure: '19:00' , version: 'VO'}] }] }, { jour: 'Mar', jourChiffre: 28, mois: 'nov', cinemas: [{ name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '17:45' , version: 'VF'}, { heure: '20:00' , version: 'VOSTFR' }] }, { name: 'Mk2 Odéon', ville: 'Paris 06', seances: [{ heure: '16:15' , version: 'VO'}, { heure: '18:30' , version: 'VO'}] }] }] },
+                { titre: 'Joker', dates: [{ jour: 'Dim', jourChiffre: 26, mois: 'nov', cinemas: [{ name: 'UGC Gobelins', ville: 'Paris 13', seances: [{ heure: '16:00', version: 'VO' }, { heure: '19:00' , version: 'VO'}] }, { name: 'UGC Danton', ville: 'Paris 06', seances: [{ heure: '14:30', version: 'VO' }, { heure: '15:00', version: 'VO' }, { heure: '20:00', version: 'VO' }] }, { name: 'Le Grand Rex', ville: 'Paris 02', seances: [{ heure: '15:00', version: 'VO' }, { heure: '19:00' , version: 'VF'}] }] }, { jour: 'Lun', jourChiffre: 27, mois: 'nov', cinemas: [{ name: 'UGC Bercy', ville: 'Paris 14', seances: [{ heure: '13:00', version: 'VOSTFR' }, { heure: '20:30', version: 'VF' }] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '15:45' , version: 'VF'}, { heure: '19:00', version: 'VO' }] }] }] },
+                { titre: 'Scary Movie', dates: [{ jour: 'Dim', jourChiffre: 26, mois: 'nov', cinemas: [{ name: 'UGC Montparnasse', ville: 'Paris 06', seances: [{ heure: '18:00' , version: 'VO'}, { heure: '20:00', version: 'VO' }] }, { name: 'Le Luxor', ville: 'Paris 10', seances: [{ heure: '15:30', version: 'VO' }, { heure: '18:00', version: 'VO' }, { heure: '21:00', version: 'VO' }] }, { name: 'Mk2 Nation', ville: 'Paris 12', seances: [{ heure: '16:30', version: 'VO' }, { heure: '20:00' , version: 'VO' }] }] }, { jour: 'Lun', jourChiffre: 27, mois: 'nov', cinemas: [{ name: 'Mk2 Gobelins', ville: 'Paris 13', seances: [{ heure: '16:00' }, { heure: '21:30' , version: 'VO'}] }, { name: 'Mk2 Bibliothèque', ville: 'Paris 13', seances: [{ heure: '17:45' , version: 'VF'}, { heure: '19:00' , version: 'VO'}] }] }, { jour: 'Mar', jourChiffre: 28, mois: 'nov', cinemas: [{ name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '17:45' , version: 'VO'}, { heure: '20:00', version: 'VO' }] }, { name: 'Mk2 Odéon', ville: 'Paris 06', seances: [{ heure: '16:15', version: 'VO' }, { heure: '18:30', version: 'VO' }] }] }] },
+                { titre: 'The Maze Runner', dates: [{ jour: 'Dim', jourChiffre: 26, mois: 'nov', cinemas: [{ name: 'UGC Gobelins', ville: 'Paris 13', seances: [{ heure: '17:00', version: 'VO' }, { heure: '19:00' , version: 'VO'}] }, { name: 'MK2 Gambetta', ville: 'Paris 20', seances: [{ heure: '14:30' , version: 'VOSTFR' }, { heure: '16:00' , version: 'VOSTFR' }, { heure: '20:00' , version: 'VO'}] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '16:45' }, { heure: '19:00' }] }] }, { jour: 'Lun', jourChiffre: 27, mois: 'nov', cinemas: [{ name: 'UGC Issy-Les-Moulineaux', ville: 'Issy-Les-Moulineaux', seances: [{ heure: '16:00' }, { heure: '21:30' }] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '15:45' , version: 'VF'}, { heure: '19:00', version: 'VF' }] }] }, { jour: 'Mar', jourChiffre: 28, mois: 'nov', cinemas: [{ name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '17:45' , version: 'VF'}, { heure: '20:00' , version: 'VF'}] }, { name: 'Pathé Boulogne', ville: 'Boulogne', seances: [{ heure: '15:15' , version: 'VF'}, { heure: '18:30' , version: 'VO'}] }] }, { jour: 'Mer', jourChiffre: 29, mois: 'nov', cinemas: [{ name: 'UGC Creteil', ville: 'Créteil', seances: [{ heure: '17:45', version: 'VF' }, { heure: '20:00', version: 'VO' }] }, { name: 'UGC Velizy', ville: 'Velizy', seances: [{ heure: '15:15', version: 'VOSTFR' }, { heure: '17:30', version: 'VF' }] }] }] },
+                { titre: 'Top Gun', dates: [{ jour: 'Dim', jourChiffre: 26, mois: 'nov', cinemas: [{ name: 'Pathé Ivry', ville: 'Ivry-Sur-Seine', seances: [{ heure: '16:30', version: 'VO' }, { heure: '18:00', version: 'VO' }] }, { name: 'UGC Danton', ville: 'Paris 06', seances: [{ heure: '14:30' , version: 'VF'}, { heure: '16:00' }, { heure: '20:00' }] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '15:45' , version: 'VO'}, { heure: '19:00', version: 'VO' }] }] }, { jour: 'Lun', jourChiffre: 27, mois: 'nov', cinemas: [{ name: 'Mk2 Gobelins', ville: 'Paris 13', seances: [{ heure: '16:00', version: 'VO' }, { heure: '21:30', version: 'VF' }] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '18:30' , version: 'VF'}, { heure: '20:00' , version: 'VO'}] }] }, { jour: 'Mar', jourChiffre: 28, mois: 'nov', cinemas: [{ name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '17:45' , version: 'VF'}, { heure: '20:00', version: 'VF' }] }, { name: 'Helios', ville: 'Colombes', seances: [{ heure: '16:15' , version: 'VF'}, { heure: '18:30' , version: 'VF'}] }] }] },
+                { titre: 'Uncharted', dates: [{ jour: 'Dim', jourChiffre: 26, mois: 'nov', cinemas: [{ name: 'Royal Palace', ville: 'Nogent-Sur-Marne', seances: [{ heure: '16:00' , version: 'VO'}, { heure: '18:00', version: 'VO' }] }, { name: 'Pathé Thiais', ville: 'Thiais', seances: [{ heure: '15:30', version: 'VO' }, { heure: '19:45' , version: 'VOSTFR' }, { heure: '22:00' , version: 'VO'}] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '15:45', version: 'VO' }, { heure: '19:00', version: 'VO' }] }] }, { jour: 'Lun', jourChiffre: 27, mois: 'nov', cinemas: [{ name: 'Mk2 Gobelins', ville: 'Paris 13', seances: [{ heure: '16:00' , version: 'VOSTFR'}, { heure: '21:30' , version: 'VF'}] }, { name: 'Mk2 Bastille', ville: 'Paris 11', seances: [{ heure: '15:45' , version: 'VF'}, { heure: '19:00', version: 'VF' }] }] }, { jour: 'Mar', jourChiffre: 28, mois: 'nov', cinemas: [{ name: 'UGC Creteil', ville: 'Créteil', seances: [{ heure: '17:45' }, { heure: '20:00' }] }, { name: 'UGC Velizy', ville: 'Velizy', seances: [{ heure: '16:15', version: 'VF' }, { heure: '18:30' , version: 'VO'}] }] }] }
             ]
 
 
         },
+      
+        redirection() {
+            const token = this.$route.params.token;
+           
+            if (token) {
+                console.log("This is the token", token)
+                checkAdminToken(token).then((isAdmin) => {
+                    setAuthentication(isAdmin);
+                    if (isAdmin) {
+                        this.$router.push({ name: 'Admin'});
+                       
+                    } else {
+                        
+                        this.$router.push("/catalog-page");
+                    }
+                });
+            } else {
+                this.$router.push("/catalog-page");
+            }
+        },
+        getImageUrl(imageName, folder) {
+
+            const token = this.$route.params.token;
+            const baseUrl = 'src/assets/' + folder ;
+
+            if (token) {
+                return `${baseUrl}?token=${token}${imageName}`;
+            } else {
+                return `${baseUrl}${imageName}`;
+            }
+        },
+        
         async onMounted() {
+
             var thisID = document.getElementById("TopBtn")!;
             if (thisID) {
                 thisID.className = "fa fa-angle-double-up show";
             }
+
             var SearchClass = document.getElementById("search-container-fixe");
             var myScrollFunc = function () {
                 var y = window.scrollY;
@@ -549,11 +618,14 @@ export default defineComponent({
 
             await this.getFilteredMoviesWithoutAPI();
             await this.getSeances();
+            
+
 
         },
     },
 
     async mounted() {
+        this.redirection();
         await this.onMounted();
     },
     beforeUnmount() {
